@@ -9,6 +9,8 @@ from sensor_msgs.msg import Image
 from geometry_msgs.msg import Twist
 from cv_bridge import CvBridge, CvBridgeError
 
+# rosservice call /gazebo/set_model_state "{model_state: {model_name: 'B1', pose: {position: {x: 0.564, y: -0.2703, z: 0.5}, orientation: {x: 0, y: 0, z: -0.733, w: -0.679}}, twist: { linear: {x: 0, y: 0, z: 0}, angular: {x: 0, y: 0, z: 0} }, reference_frame: 'world'}}"
+# rosrun 2025_controller data_collection.py _session_name:=bridge_lap_1
 class DataCollector:
     def __init__(self):
         rospy.init_node('data_collection_node', anonymous=True)
@@ -19,7 +21,7 @@ class DataCollector:
         self.session_name = rospy.get_param('~session_name', 'default_run')
         
         # Saves data inside your cnn_trainer folder for better organization
-        self.base_dir = os.path.expanduser('~/cnn_trainer/robot_data')
+        self.base_dir = os.path.expanduser('~/cnn_trainer/robot_data_dirt')
         self.data_dir = os.path.join(self.base_dir, self.session_name)
         self.image_dir = os.path.join(self.data_dir, 'images')
         self.csv_path = os.path.join(self.data_dir, 'labels.csv')
