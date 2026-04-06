@@ -22,6 +22,7 @@ class TFLiteBrain:
         img = cv_image[int(h * 0.33):h, :] 
         img = cv2.resize(img, (200, 66))
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
         return np.expand_dims(img, axis=0).astype(np.float32)
 
     def get_command(self, cv_image):
