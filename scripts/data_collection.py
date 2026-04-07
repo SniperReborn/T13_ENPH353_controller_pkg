@@ -14,6 +14,9 @@ from cv_bridge import CvBridge, CvBridgeError
 # TELEPORT TO BEGINNING OF DIRT 
 # rosservice call /gazebo/set_model_state "{model_state: {model_name: 'B1', pose: {position: {x: 0.564, y: -0.2703, z: 0.5}, orientation: {x: 0, y: 0, z: -0.733, w: -0.679}}, twist: { linear: {x: 0, y: 0, z: 0}, angular: {x: 0, y: 0, z: 0} }, reference_frame: 'world'}}"
 
+# TELEPORT TO BEFORE DIRT BRIDGE
+# rosservice call /gazebo/set_model_state "{model_state: {model_name: 'B1', pose: {position: {x: 0.983, y: 2.36, z: 0.5}, orientation: {x: 0, y: 0, z: -0.999, w: 0.0453}}, twist: { linear: {x: 0, y: 0, z: 0}, angular: {x: 0, y: 0, z: 0} }, reference_frame: 'world'}}"
+
 # TELEPORT TO BEGINNING OF BABY YODA
 # rosservice call /gazebo/set_model_state "{model_state: {model_name: 'B1', pose: {position: {x: -3.646, y: 0.663, z: 0.5}, orientation: {x: 0, y: 0, z: -0.797, w: 0.603}}, twist: { linear: {x: 0, y: 0, z: 0}, angular: {x: 0, y: 0, z: 0} }, reference_frame: 'world'}}"
 
@@ -26,7 +29,7 @@ from cv_bridge import CvBridge, CvBridgeError
 # TELEPORT TO MOUNTAIN LEDGE
 # rosservice call /gazebo/set_model_state "{model_state: {model_name: 'B1', pose: {position: {x: -2.424, y: -0.086, z: 1.586}, orientation: {x: 0.068, y: 0.0581, z: 0.756, w: -0.648}}, twist: { linear: {x: 0, y: 0, z: 0}, angular: {x: 0, y: 0, z: 0} }, reference_frame: 'world'}}"
 
-# rosrun 2025_controller data_collection.py _session_name:=mountain_1
+# rosrun 2025_controller data_collection.py _session_name:=dirt_13
 
 # Zero out the speed
 # rostopic pub -1 /B1/cmd_vel geometry_msgs/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"
@@ -41,7 +44,7 @@ class DataCollector:
         self.session_name = rospy.get_param('~session_name', 'default_run')
         
         # Saves data inside your cnn_trainer folder for better organization
-        self.base_dir = os.path.expanduser('~/cnn_trainer/robot_data_mountain')
+        self.base_dir = os.path.expanduser('~/cnn_trainer/robot_data_dirt')
         self.data_dir = os.path.join(self.base_dir, self.session_name)
         self.image_dir = os.path.join(self.data_dir, 'images')
         self.csv_path = os.path.join(self.data_dir, 'labels.csv')

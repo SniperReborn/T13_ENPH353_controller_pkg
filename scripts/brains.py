@@ -19,11 +19,11 @@ class TFLiteBrain:
 
     def preprocess(self, cv_image):
         h, w = cv_image.shape[:2]
-        img = cv_image[int(h * 0.33):h, :] 
-        img = cv2.resize(img, (200, 66))
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        cv_image = cv_image[int(h * 0.33):h, :] 
+        cv_image = cv2.resize(cv_image, (200, 66))
+        cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
 
-        return np.expand_dims(img, axis=0).astype(np.float32)
+        return np.expand_dims(cv_image, axis=0).astype(np.float32)
 
     def get_command(self, cv_image):
         """Returns (linear_x, angular_z) based on the image"""
