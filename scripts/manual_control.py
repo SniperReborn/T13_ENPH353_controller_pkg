@@ -6,6 +6,8 @@ from cv_bridge import CvBridge
 from sensor_msgs.msg import Image, Joy
 from geometry_msgs.msg import Twist
 from sign_extract import SignTracker
+from letter_extract import extract_and_sort_letters
+from ocr import SignReaderCNN
 
 # source ~/ros_ws/devel/setup.bash
 
@@ -15,27 +17,32 @@ from sign_extract import SignTracker
 
 # rosrun joy joy_node _dev:=/dev/input/js2 _autorepeat_rate:=20 _deadzone:=0.0
 
+# ./score_tracker.py
+
 class ManualController:
     def __init__(self):
         rospy.init_node('manual_control_node')
         self.bridge = CvBridge()
-        
+        self.min_sign_size = 30000
         # Color Config
         self.LOWER_B, self.UPPER_B = (115, 125, 100), (125, 255, 210)
         self.LOWER_W, self.UPPER_W = (0, 0, 100), (3, 3, 255)
 
         self.sign_window_open = False
+
+        model_path = "/home/fizzer/cnn_trainer/wei_dynasty.tflite"
+        self.cnn = SignReaderCNN(model_path)
         
         # Single Source of Truth for the "Winner" sign
         self.active_sign = {'image': None, 'area': 0, 'timestamp': 0.0}
 
         # Trackers
-        self.left_tracker = SignTracker(self.LOWER_B, self.UPPER_B, self.LOWER_W, self.UPPER_W, 20000)
-        self.right_tracker = SignTracker(self.LOWER_B, self.UPPER_B, self.LOWER_W, self.UPPER_W, 20000)
+        self.left_tracker = SignTracker(self.LOWER_B, self.UPPER_B, self.LOWER_W, self.UPPER_W, self.min_sign_size, 3.0)
+        self.right_tracker = SignTracker(self.LOWER_B, self.UPPER_B, self.LOWER_W, self.UPPER_W, self.min_sign_size, 3.0)
 
         # Image cache for GUI
         self.feeds = {'front': None, 'left': None, 'right': None}
-        self.comparison_window = 2.0  # Wait 1s for the 2nd camera to finish
+        self.comparison_window = 1.0  # Wait 1s for the 2nd camera to finish
         self.sign_processed = False   # Flag to ensure we only process a sign once
         self.sign_window_open = False
 
@@ -54,7 +61,6 @@ class ManualController:
         if time_since_last > 3.0:
             self.active_sign = {'image': img, 'area': area, 'timestamp': now}
             rospy.loginfo("First camera locked a sign. Comparison window OPEN.")
-            # Do NOT run YOLO yet! Wait for the window to close.
 
         # 2. COMPARISON: We are within the 1.0s window of the first detection.
         elif time_since_last < self.comparison_window:
@@ -95,9 +101,9 @@ class ManualController:
             now = rospy.get_time()
             
             # 1. Show the raw camera feeds
-            if self.feeds['front'] is not None: cv2.imshow("Front", self.feeds['front'])
-            if self.feeds['left'] is not None: cv2.imshow("Left", self.feeds['left'])
-            if self.feeds['right'] is not None: cv2.imshow("Right", self.feeds['right'])
+            # if self.feeds['front'] is not None: cv2.imshow("Front", self.feeds['front'])
+            # if self.feeds['left'] is not None: cv2.imshow("Left", self.feeds['left'])
+            # if self.feeds['right'] is not None: cv2.imshow("Right", self.feeds['right'])
 
             # 2. Logic for handling the "Best Sign"
             if self.active_sign['image'] is not None:
@@ -105,14 +111,24 @@ class ManualController:
 
                 # --- TRIGGER POINT: Pick the winner after the window closes ---
                 if time_since_lock > self.comparison_window and not self.sign_processed:
-                    rospy.loginfo("--- WINDOW CLOSED: Finalizing Best Sign ---")
-                    # This is where you eventually run your YOLO model:
-                    # results = self.sign_model.predict(source=self.active_sign['image'])
+                    rospy.loginfo("--- WINDOW CLOSED: Extracting & Reading ---")
+                    
+                    # Note we are unpacking 3 things now!
+                    top_line, bottom_line, closed_mask = extract_and_sort_letters(self.active_sign['image'])
+                    
+                    # --- NEW: Feed to CNN ---
+                    topic_string = self.cnn.predict_line(closed_mask, top_line)
+                    clue_string = self.cnn.predict_line(closed_mask, bottom_line)
+
+                    rospy.loginfo(f">>> TOPIC: {topic_string}")
+                    rospy.loginfo(f">>> CLUE:  {clue_string}")
+
+                    # (You can keep your cv2.rectangle drawing code here for debugging)
                     self.sign_processed = True
 
                 # --- DISPLAY LOGIC: Keep the winner on screen for 3 seconds ---
                 if time_since_lock < 3.0:
-                    cv2.imshow("Best Sign Found", self.active_sign['image'])
+                    # cv2.imshow("Best Sign Found", self.active_sign['image'])
                     self.sign_window_open = True
                 else:
                     # Time is up! Flush the sign so the robot can look for the next one

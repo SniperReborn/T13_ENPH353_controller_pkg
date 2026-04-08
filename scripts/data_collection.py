@@ -29,7 +29,10 @@ from cv_bridge import CvBridge, CvBridgeError
 # TELEPORT TO MOUNTAIN LEDGE
 # rosservice call /gazebo/set_model_state "{model_state: {model_name: 'B1', pose: {position: {x: -2.424, y: -0.086, z: 1.586}, orientation: {x: 0.068, y: 0.0581, z: 0.756, w: -0.648}}, twist: { linear: {x: 0, y: 0, z: 0}, angular: {x: 0, y: 0, z: 0} }, reference_frame: 'world'}}"
 
-# rosrun 2025_controller data_collection.py _session_name:=dirt_13
+# RUN THIS BEFORE GATHERING TRAINING DATA
+# rosparam set use_sim_time true
+
+# rosrun 2025_controller data_collection.py _session_name:=pavementv2_1
 
 # Zero out the speed
 # rostopic pub -1 /B1/cmd_vel geometry_msgs/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"
@@ -44,7 +47,7 @@ class DataCollector:
         self.session_name = rospy.get_param('~session_name', 'default_run')
         
         # Saves data inside your cnn_trainer folder for better organization
-        self.base_dir = os.path.expanduser('~/cnn_trainer/robot_data_dirt')
+        self.base_dir = os.path.expanduser('~/cnn_trainer/data_new/robot_data_pavementv2')
         self.data_dir = os.path.join(self.base_dir, self.session_name)
         self.image_dir = os.path.join(self.data_dir, 'images')
         self.csv_path = os.path.join(self.data_dir, 'labels.csv')
