@@ -39,4 +39,5 @@ class TFLiteBrain:
         
         # Start with 1.0 gain. Only increase if the robot is "lazy"
         # but 2.25 is likely way too high for stability.
+        # print(f"Model Think: Lin: {lin_x:.2f} | Ang: {ang_z:.2f}")
         return lin_x, ang_z

@@ -11,6 +11,9 @@ from cv_bridge import CvBridge, CvBridgeError
 
 # rosservice call /gazebo/get_model_state "{model_name: 'B1', relative_entity_name: 'world'}"
 
+# TELEPORT TO ROUNDABOUT EXIT
+# rosservice call /gazebo/set_model_state "{model_state: {model_name: 'B1', pose: {position: {x: 2.268, y: -2.297, z: 0.5}, orientation: {x: 0, y: 0, z: 1, w: -0.032}}, twist: { linear: {x: 0, y: 0, z: 0}, angular: {x: 0, y: 0, z: 0} }, reference_frame: 'world'}}"
+
 # TELEPORT TO BEGINNING OF DIRT 
 # rosservice call /gazebo/set_model_state "{model_state: {model_name: 'B1', pose: {position: {x: 0.564, y: -0.2703, z: 0.5}, orientation: {x: 0, y: 0, z: -0.733, w: -0.679}}, twist: { linear: {x: 0, y: 0, z: 0}, angular: {x: 0, y: 0, z: 0} }, reference_frame: 'world'}}"
 
@@ -32,7 +35,9 @@ from cv_bridge import CvBridge, CvBridgeError
 # RUN THIS BEFORE GATHERING TRAINING DATA
 # rosparam set use_sim_time true
 
-# rosrun 2025_controller data_collection.py _session_name:=pavementv2_1
+# rosrun joy joy_node _dev:=/dev/input/js2 _autorepeat_rate:=20 _deadzone:=0.0
+
+# rosrun 2025_controller data_collection.py _session_name:=p_clean_1
 
 # Zero out the speed
 # rostopic pub -1 /B1/cmd_vel geometry_msgs/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"
