@@ -23,8 +23,8 @@ class StateMachineController:
         self.ears = LidarMotionDetector(check_distance=10.0) 
         
         model_paths = [
-            '~/cnn_trainer/data_RTF=0.95/pavement_modelv2.tflite',
-            '~/cnn_trainer/data_RTF=0.95/dirt_model.tflite',
+            '~/cnn_trainer/data_RTF=0.95/pavement_model.tflite',
+            '~/cnn_trainer/data_RTF=0.95/dirt_modelv4.tflite',
             '~/cnn_trainer/data_RTF=0.95/yoda_modelv4.tflite',
             '~/cnn_trainer/data_RTF=0.95/mountain_modelv3.tflite'
         ]
@@ -39,7 +39,7 @@ class StateMachineController:
         self.cooldown_duration = 2.0
 
         self.angular_nudge = 1.0
-        self.velocity_nudge = 0.9
+        self.velocity_nudge = 1.0
 
         self.global_start_time = rospy.get_time()
         self.max_timeout_duration = 240.0 
@@ -100,6 +100,7 @@ class StateMachineController:
             is_in_cooldown = (current_time - self.cooldown_finish_time).to_sec() < self.cooldown_duration
             
             if not is_in_cooldown and self.eyes.is_pink_line_present(cv_image):
+                self.velocity_nudge = 0.85
                 self.current_state = RobotState.PAUSED
                 self.pause_start_time = current_time
                 self.ears.reset_baseline()
